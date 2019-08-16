@@ -35,14 +35,16 @@ void initHumiditySensor()
 	 ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
-short readHumidity()
+//// 比例系数，将ADC测量值转换为 0~100的百分比
+float f = 100.0f/(4096*3/3.3f);
+
+//// 读取湿度信息，返回的数值为0~100，分辨度为0.1
+float readHumidity()
 {
-   return  ADC1->DR;
+   return  ((int)((ADC1->DR)*f*10))*0.1f;
 }
 
 TxPack txpack;
-
-float f = 100.0f/(4096*3/3.3f);
 
 int main(void)
 {
@@ -59,7 +61,7 @@ while(1)
 	}
 	
 	
-	txpack.floats[0] = ((int)(readHumidity()*f*10))*0.1f;
+	txpack.floats[0] = readHumidity();
 	sendValuePack(&txpack); 
 		
 }
