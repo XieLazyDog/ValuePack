@@ -23,8 +23,9 @@ void initColorLED(uint16_t period)
    GPIO_Init(GPIOA, &GPIO_InitStructure);
    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
    GPIO_Init(GPIOB, &GPIO_InitStructure);
+
 	
-   uint16_t PrescalerValue = (uint16_t) (SystemCoreClock / 24000000) - 1;
+	 uint16_t PrescalerValue = (uint16_t) (SystemCoreClock / 24000000) - 1;
    /* Time base configuration */
    TIM_TimeBaseStructure.TIM_Period = period;
    TIM_TimeBaseStructure.TIM_Prescaler = PrescalerValue;
@@ -77,14 +78,14 @@ void initColorLED(uint16_t period)
 
 void setRGB(unsigned char r,unsigned char g,unsigned char b)
 {
-    TIM3->CCR1 = r;
+	  TIM3->CCR1 = r;
     TIM3->CCR2 = g;
     TIM3->CCR3 = b;		
 }
 
 int main(void)
 {
-
+ 
 	initColorLED(128);
 	initValuePack(115200);
 	

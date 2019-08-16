@@ -2,7 +2,6 @@
 
 unsigned char bits[] = {0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
 
-
 const unsigned int VALUEPACK_INDEX_RANGE=VALUEPACK_BUFFER_SIZE<<3; 
 const unsigned short  TXPACK_BYTE_SIZE = ((TX_BOOL_NUM+7)>>3)+TX_BYTE_NUM+(TX_SHORT_NUM<<1)+(TX_INT_NUM<<2)+(TX_FLOAT_NUM<<2);
 const unsigned short  RXPACK_BYTE_SIZE = ((RX_BOOL_NUM+7)>>3)+RX_BYTE_NUM+(RX_SHORT_NUM<<1)+(RX_INT_NUM<<2)+(RX_FLOAT_NUM<<2);
@@ -16,6 +15,7 @@ long rdIndex=0;
 unsigned char vp_rxbuff[VALUEPACK_BUFFER_SIZE];
 unsigned char vp_txbuff[TXPACK_BYTE_SIZE+3];
 
+
 DMA_InitTypeDef dma;
 
 void initValuePack(int baudrate)
@@ -23,15 +23,14 @@ void initValuePack(int baudrate)
 	
 	USART_InitTypeDef USART_InitStructure;
 	GPIO_InitTypeDef GPIO_InitStructure;
-
 	
-	// Ê±ÖÓ³õÊ¼»¯
+	// æ—¶é’Ÿåˆå§‹åŒ–
 	
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1|RCC_APB2Periph_AFIO,ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1,ENABLE);
 	
-	// Òı½Å³õÊ¼»¯
+	// å¼•è„šåˆå§‹åŒ–
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9; 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz; 
@@ -42,7 +41,7 @@ void initValuePack(int baudrate)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
-	// ´®¿Ú³õÊ¼»¯
+	// ä¸²å£åˆå§‹åŒ–
 	
   USART_InitStructure.USART_BaudRate = baudrate;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -53,7 +52,7 @@ void initValuePack(int baudrate)
   
   USART_Init(USART1, &USART_InitStructure);
 	
-	// DMA³õÊ¼»¯
+	// DMAåˆå§‹åŒ–
 	
 	DMA_DeInit(DMA1_Channel4);
 	dma.DMA_DIR = DMA_DIR_PeripheralDST;
@@ -97,22 +96,19 @@ unsigned char isok;
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//procValuePack ÓÃÀ´´¦ÀíÊÖ»ú´«À´µÄÊı¾İ
+//procValuePack ç”¨æ¥å¤„ç†æ‰‹æœºä¼ æ¥çš„æ•°æ®
 //
 
 unsigned char readValuePack(RxPack *rx_pack_ptr)
 {
- 
-	isok = 0;
+	isok = 0;	
 	this_index =VALUEPACK_BUFFER_SIZE-DMA1_Channel5->CNDTR;
 	if(this_index<last_index)
 		rxIndex+=VALUEPACK_BUFFER_SIZE+this_index-last_index;
 	else
 		rxIndex+=this_index-last_index;
-	
 	while(rdIndex<(rxIndex-((rx_pack_length))))
    rdIndex+=rx_pack_length;	
-	
 	while(rdIndex<=(rxIndex-rx_pack_length))
 	{
 		
@@ -122,9 +118,9 @@ unsigned char readValuePack(RxPack *rx_pack_ptr)
 		{
 			if(vp_rxbuff[(rdi+RXPACK_BYTE_SIZE+2)%VALUEPACK_BUFFER_SIZE]==PACK_TAIL)
 			{
-				//  ¼ÆËãĞ£ÑéºÍ
+				//  è®¡ç®—æ ¡éªŒå’Œ
 				sum=0;
-			  for(unsigned short s=0;s<RXPACK_BYTE_SIZE;s++)
+			  for(short s=0;s<RXPACK_BYTE_SIZE;s++)
 				{
 					rdi++;
 					if(rdi>=VALUEPACK_BUFFER_SIZE)
@@ -137,7 +133,7 @@ unsigned char readValuePack(RxPack *rx_pack_ptr)
 					
         if(sum==vp_rxbuff[rdi]) 
 				{
-					//  ÌáÈ¡Êı¾İ°üÊı¾İ Ò»¹²ÓĞÎå²½£¬ bool byte short int float
+					//  æå–æ•°æ®åŒ…æ•°æ® ä¸€å…±æœ‰äº”æ­¥ï¼Œ bool byte short int float
 					
 					// 1. bool
 					#if  RX_BOOL_NUM>0
@@ -254,10 +250,10 @@ unsigned char valuepack_tx_index;
 
 void sendValuePack(TxPack *tx_pack_ptr)
 {
-
+	int i;
 		vp_txbuff[0]=0xa5;
 		sum=0;
-	//  ÓÉÓÚ½á¹¹ÌåÖĞ²»Í¬ÀàĞÍµÄ±äÁ¿ÔÚÄÚ´æ¿Õ¼äµÄÅÅ²¼²»ÊÇÑÏ¸ñ¶ÔÆëµÄ£¬ÖĞ¼äÇ¶ÓĞÎŞĞ§×Ö½Ú£¬Òò´ËĞèÒªÌØÊâ´¦Àí
+	//  ç”±äºç»“æ„ä½“ä¸­ä¸åŒç±»å‹çš„å˜é‡åœ¨å†…å­˜ç©ºé—´çš„æ’å¸ƒä¸æ˜¯ä¸¥æ ¼å¯¹é½çš„ï¼Œä¸­é—´åµŒæœ‰æ— æ•ˆå­—èŠ‚ï¼Œå› æ­¤éœ€è¦ç‰¹æ®Šå¤„ç†
 	 
   valuepack_tx_bit_index = 0;
   valuepack_tx_index = 1;
