@@ -152,16 +152,24 @@ unsigned char readValuePack(RxPack *rx_pack_ptr)
 					//  提取数据包数据 一共有五步， bool byte short int float
 					// 1. bool
 					#if  RX_BOOL_NUM>0
-						idc = (uint32_t)rx_pack_ptr->bools;
+						
+					  idc = (uint32_t)rx_pack_ptr->bools;
 					  idl = (RX_BOOL_NUM+7)>>3;
-					  for(idi=0;idi<idl;idi++)
-					  {
-					    if(rdii>=VALUEPACK_BUFFER_SIZE)
-					      rdii -= VALUEPACK_BUFFER_SIZE;
-					   (*((unsigned char *)idc))= vp_rxbuff[rdii];
-							rdii++;
-							idc++;
-					  }
+					
+					bool_bit = 0;
+					for(bool_index=0;bool_index<RX_BOOL_NUM;bool_index++)
+					{
+						*((unsigned char *)(idc+bool_index)) = (vp_rxbuff[rdii]&(0x01<<bool_bit))?1:0;
+						bool_bit++;
+						if(bool_bit>=8)
+						{
+						  bool_bit = 0;
+							rdii ++;
+						}
+					}
+					if(bool_bit)
+						rdii ++;
+					
 				        #endif
 					// 2.byte
 					#if RX_BYTE_NUM>0
